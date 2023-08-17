@@ -1,0 +1,12 @@
+
+class TreeMetaClass(InitialMetaclass, MPTTModelBase):
+    pass
+
+class BMPMixin(MPTTModel, AuthorDtUuidMixin, ClassifierMixin, metaclass = TreeMetaClass):
+    class Meta:
+        abstract = True
+
+
+class BMPGroupMixin(AuthorDtUuidMixin, ClassifierMixin):
+    class Meta:
+        abstract = True
