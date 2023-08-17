@@ -1,0 +1,39 @@
+class BMP(BMPMixin):
+    number = models.CharField(_('Number'), max_length=255, db_index=True, unique=True)
+    bmp_group = models.ForeignKey(
+        'classifier.Region', verbose_name=_('BMP groups'), blank=True, null=True, on_delete=models.SET_NULL
+    )
+
+    image = models.ForeignKey(
+        'uploadable.ImageUpload', verbose_name=_('Image'), related_name='bmp_image',
+        null=True, blank=True, on_delete=models.SET_NULL,
+    )
+
+    icon = models.ForeignKey(
+        'uploadable.ImageUpload', verbose_name=_('Icon'), related_name='bmp_icon',
+        null=True, blank=True, on_delete=models.SET_NULL,
+    )
+
+    class MPTTMeta:
+        order_insertion_by = ['name']
+
+    class Meta(MPTTModel.Meta, BMPMixin.Meta):
+        verbose_name = _('BMP')
+        verbose_name_plural = _('BMPs')
+
+    def __str__(self):
+        if self.name:
+            return '%s, %s' % (self.number, self.name)
+        else:
+            return self.number
+
+
+
+
+class   BMPGroup(BMPGroupMixin):
+    ''' Группа BMP '''
+
+    class Meta:
+        verbose_name = _('BMP group')
+        verbose_name_plural = _('BMP groups')
+
