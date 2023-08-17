@@ -1,7 +1,8 @@
+
 class BMP(BMPMixin):
     number = models.CharField(_('Number'), max_length=255, db_index=True, unique=True)
     bmp_group = models.ForeignKey(
-        'classifier.Region', verbose_name=_('BMP groups'), blank=True, null=True, on_delete=models.SET_NULL
+        'classifier.BMPGroup', verbose_name=_('BMP groups'), blank=True, null=True, on_delete=models.SET_NULL
     )
 
     image = models.ForeignKey(
@@ -36,4 +37,3 @@ class   BMPGroup(BMPGroupMixin):
     class Meta:
         verbose_name = _('BMP group')
         verbose_name_plural = _('BMP groups')
-
