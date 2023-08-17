@@ -1,0 +1,71 @@
+from django.db import models
+from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
+from re_bin.models_abstract import (
+    StatusyChildOrgOwnerHistoryDtUuidMixin, StatusySignOrgOwnerHistoryDtUuidMixin,
+)
+
+from  bazis.contrib.statusy.models_abstract import StatusyMixin
+
+class TariffPlace(StatusySignOrgOwnerHistoryDtUuidMixin, StatusyMixin):
+    ''' Тарифы к ПП  '''
+    place = models.ForeignKey(
+        'place.Place', verbose_name=_('Place'), on_delete=models.CASCADE, null=True, blank=True,
+    )
+
+    STATUSES = {
+        ('active', _('Active')),  # Активный
+        ('inactive', _('Inactive')),  # Неактивный
+        ('deleted', _('deleted')),  # Удаленный
+    }
+
+    # дата подписания
+    year_active = models.IntegerField(_('Date description'), blank=True, null=True)
+    status = models.CharField(
+        _('Statuses'), max_length=8, choices=STATUSES,
+    )
+    # Комментарий
+    description = models.TextField(_('Comment'), blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('Tariff of the place')
+        verbose_name_plural = _('Tariff of the places')
+
+    def __str__(self) -> str:
+        return f'{self.place.name}' if self.place else f'{self.pk}'
+
+class TariffPlaceWasteType(StatusyChildOrgOwnerHistoryDtUuidMixin, StatusyMixin):
+    ''' Тарифы к ПП: вид отхода '''
+
+    tariff_place = models.ForeignKey(
+        'long_term.TariffPlace', on_delete=models.CASCADE, related_name='tariff_place',
+    )
+    # Код BMP
+    bmp_code = models.ForeignKey(
+        'classifier.BMP', verbose_name=_('BMP code'), on_delete=models.SET_NULL, null=True,
+    )
+    # Тариф, руб/кг.
+    kg_tariff = models.DecimalField(
+        _('Tariff for volume, rub/cu.m.'), max_digits=15, decimal_places=2, blank=True, null=True,
+    )
+    # Тариф, руб/шт.
+    unit_tariff = models.DecimalField(
+        _('Tariff per mass, rub/t.'), max_digits=15, decimal_places=2, blank=True, null=True,
+    )
+
+    class Meta:
+        verbose_name = _('Tariff : type of waste')
+        verbose_name_plural = _('Tariff: types of wastes')
+
+    def __str__(self) -> str:
+        return f'{self.bmp_code}'
+
+    @classmethod
+    def get_status_field(cls):  # noqa
+        return 'tariff_place__status_id'
+
+    @cached_property
+    def dict_data(self) -> dict:
+        data = super().dict_data
+        data["bmp_code"] = self.bmp_code.dict_data
+        return data
